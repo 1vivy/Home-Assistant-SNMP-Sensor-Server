@@ -1,7 +1,7 @@
 {
   "name": "SNMP Sensor Server",
-  "version": "1.5.0",
-  "changelog": "Added manual UPS OID mapping support so you can map specific Home Assistant entities (like EcoFlow BLE sensors) to standard UPS-MIB OIDs with optional value conversion.",
+  "version": "1.6.0",
+  "changelog": "Added EcoFlow UPS mode: provide one EcoFlow device id and auto-generate practical UPS-MIB mappings for ha-ef-ble entities.",
   "slug": "snmpd-sensor-server",
   "description": "SNMP v2c server for monitoring sensors and HA host",
   "url": "https://github.com/PecceG2/Home-Assistant-SNMP-Sensor-Server",
@@ -25,7 +25,9 @@
     "expose_sensors_OID_base": "1.3.6.1.4.1.43.10.210.",
     "sensors_to_expose": "all",
     "enable_ups_oid_mapping": false,
-    "ups_oid_mappings": "[]"
+    "ups_oid_mappings": "[]",
+    "ecoflow_ups_mode": false,
+    "ecoflow_device_id": ""
   },
   "schema": {
     "sysname": "str",
@@ -37,7 +39,9 @@
     "expose_sensors_OID_base": "str",
     "sensors_to_expose": "str",
     "enable_ups_oid_mapping": "bool",
-    "ups_oid_mappings": "str"
+    "ups_oid_mappings": "str",
+    "ecoflow_ups_mode": "bool",
+    "ecoflow_device_id": "str"
   },
   "ports": {
     "161/udp": 161

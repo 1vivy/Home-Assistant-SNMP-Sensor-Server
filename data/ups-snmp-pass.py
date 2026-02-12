@@ -45,15 +45,23 @@ def load_mappings():
         if not snmp_type:
             continue
 
+        if "entity_ids" in mapping and isinstance(mapping["entity_ids"], list):
+            entity_ids = [str(entity_id) for entity_id in mapping["entity_ids"] if str(entity_id).strip()]
+        elif "entity_id" in mapping:
+            entity_ids = [str(mapping["entity_id"])]
+        else:
+            entity_ids = []
+
         parsed.append(
             {
                 "oid": oid,
-                "entity_id": mapping["entity_id"],
+                "entity_ids": entity_ids,
                 "snmp_type": snmp_type,
                 "scale": float(mapping.get("scale", 1)),
                 "offset": float(mapping.get("offset", 0)),
                 "value_map": mapping.get("value_map", {}),
                 "default_value": mapping.get("default_value"),
+                "static_value": mapping.get("static_value"),
             }
         )
 
@@ -114,6 +122,18 @@ def fetch_state(entity_id):
     return payload.get("state")
 
 
+def fetch_first_state(entity_ids):
+    last_error = None
+    for entity_id in entity_ids:
+        try:
+            return fetch_state(entity_id)
+        except Exception as error:  # noqa: PERF203
+            last_error = error
+    if last_error:
+        raise last_error
+    raise RuntimeError("No entity IDs configured")
+
+
 def find_getnext(mappings, oid):
     for mapping in mappings:
         if mapping["oid"] > oid:
@@ -122,7 +142,18 @@ def find_getnext(mappings, oid):
 
 
 def output_mapping(mapping):
-    value = resolve_value(mapping, fetch_state(mapping["entity_id"]))
+    if mapping.get("static_value") is not None:
+        value = mapping["static_value"]
+    else:
+        try:
+            raw_state = fetch_first_state(mapping["entity_ids"])
+        except Exception:
+            if mapping.get("default_value") is None:
+                raise
+            raw_state = mapping["default_value"]
+
+        value = resolve_value(mapping, raw_state)
+
     print(format_oid(mapping["oid"]))
     print(mapping["snmp_type"])
     print(value)

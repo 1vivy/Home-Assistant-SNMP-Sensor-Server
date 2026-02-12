@@ -32,74 +32,44 @@
 ---
 
 1. In your HA panel, go to `Configuration` -> `Add-ons, Backup & supervisor`.
-
 2. In the lower right corner, click on `Add-on Store` button.
-
-3. Go to the `three dots` on the top right screen and open `Repositories`
-
+3. Go to the `three dots` on the top right screen and open `Repositories`.
 4. Copy and paste this link in Add box, and press "Add" button:
 `https://github.com/PecceG2/Home-Assistant-SNMP-Sensor-Server`
-
 5. Close Add-on pop-up, refresh the page with F5 and go to `Configuration` -> `Add-ons, Backup & supervisor`.
-
-6. Find "SNMP Sensor Server" add-on and click them. Now, install it.
-
+6. Find "SNMP Sensor Server" add-on and install it.
 
 **Configuration and usage**
 ---
 
 ### Auto-generated sensor OIDs
 
-The add-on can still auto-generate OIDs for all Home Assistant entities by using `extend` entries (same behavior as previous versions).
+The add-on can auto-generate OIDs for Home Assistant entities using `extend` entries (legacy behavior).
 
-### Manual UPS OID mapping (EcoFlow / UPS-MIB use case)
+### EcoFlow UPS mode (intended usage with ha-ef-ble)
 
-You can now map specific Home Assistant entities to standard UPS-MIB OIDs under `.1.3.6.1.2.1.33`.
+This repository is now optimized for `ha-ef-ble` usage.
 
-1. Enable `enable_ups_oid_mapping`.
-2. Fill `ups_oid_mappings` with a JSON array.
-3. Each entry supports:
-   - `oid` (required): full UPS OID.
-   - `entity_id` (required): HA entity to read.
-   - `snmp_type` (optional): `string`, `integer`, `gauge`, `counter`, `timeticks`.
-   - `value_map` (optional): map raw states to desired output.
-   - `scale` and `offset` (optional): numeric conversion before returning.
-   - `default_value` (optional): fallback for unavailable/unknown values.
-
-`ups_oid_mappings` is a string field, so in the add-on config use YAML `>-` (recommended) and paste a JSON array as its value.
+When `ecoflow_ups_mode` is enabled, you only provide one device id (example: `d32156`) and the add-on auto-generates practical UPS-MIB mappings under `.1.3.6.1.2.1.33`.
 
 ```yaml
-enable_ups_oid_mapping: true
-ups_oid_mappings: >-
-  [
-    {"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"},
-    {"oid":"1.3.6.1.2.1.33.1.2.1.0","entity_id":"binary_sensor.ef_d32156_plug","snmp_type":"string","value_map":{"on":"OL","off":"OB"}}
-  ]
+ecoflow_ups_mode: true
+ecoflow_device_id: d32156
 ```
 
-Example:
+Auto-mapped OIDs include:
 
-```json
-[
-  {
-    "oid": "1.3.6.1.2.1.33.1.2.4.0",
-    "entity_id": "sensor.ef_d32156_battery_level",
-    "snmp_type": "integer"
-  },
-  {
-    "oid": "1.3.6.1.2.1.33.1.2.1.0",
-    "entity_id": "binary_sensor.ef_d32156_plug",
-    "snmp_type": "string",
-    "value_map": {
-      "on": "OL",
-      "off": "OB"
-    }
-  }
-]
-```
+- `1.3.6.1.2.1.33.1.1.2.0` (`upsIdentModel`) static `EcoFlow BLE`
+- `1.3.6.1.2.1.33.1.1.5.0` (`upsIdentName`) static `EcoFlow <device_id>`
+- `1.3.6.1.2.1.33.1.2.4.0` (`upsEstimatedChargeRemaining`) from `sensor.ef_<id>_battery_level` (fallback `main_battery_level`)
+- `1.3.6.1.2.1.33.1.4.1.0` (`upsOutputSource`) from plug state (`on` => normal/OL, `off` => battery/OB)
+- `1.3.6.1.2.1.33.1.4.4.1.4.1` (`upsOutputPower`) from `sensor.ef_<id>_output_power`
+
+### Manual UPS OID mapping (advanced override)
+
+`ups_oid_mappings` remains available for custom OIDs and manual overrides. If `ecoflow_ups_mode` is enabled, manual entries override auto-generated entries by OID.
 
 <br />
-
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg

@@ -10,102 +10,62 @@ Then, in the new list of add-ons, install `SNMP Server`
 
 ## How to use
 
-1. Set the `community` option, eg, `public`. Fill in the other options if you wish.
-2. Set the port under network, eg, `161`.
+1. Set the `community` option, e.g. `public`.
+2. Set the port under network, e.g. `161`.
 3. Save the add-on configuration by clicking the "SAVE" button.
 4. Start the add-on.
 
 ## Configuration
 
-The SNMP server add-on can be changed to your likings. This section
-covers each configuration option.
-
-Example add-on configuration:
+Example add-on configuration (EcoFlow mode):
 
 ```yaml
 community: public
 location: Home
 name: RPi
 email: rpi@me.com
-expose_sensors: true
-sensors_to_expose: sensor.ef_*
-enable_ups_oid_mapping: true
-ups_oid_mappings: >-
-  [{"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"}]
+ecoflow_ups_mode: true
+ecoflow_device_id: d32156
 ```
 
-### Option: `community`
+### Option: `ecoflow_ups_mode`
 
-The community your SNMP monitor is looking for, e.g. `public`.
+Enable device-id driven UPS mapping generation for `ha-ef-ble` entities.
 
-### Option: `location`
+### Option: `ecoflow_device_id`
 
-The SNMP location, e.g. `Home`.
+Single EcoFlow device id (for example `d32156`). This is used to build entity IDs such as `sensor.ef_d32156_output_power`.
 
-### Option: `name`
+### Option: `ups_oid_mappings`
 
-The SNMP contact name, e.g. `RPi`.
+Advanced JSON override list. Use this if you need to override/extend generated mappings. In EcoFlow mode, manual entries win on OID conflicts.
 
-### Option: `email`
+### Option: `enable_ups_oid_mapping`
 
-The SNMP contact email address.
+Legacy/manual mode. Enables manual mapping without EcoFlow auto-generation.
 
 ### Option: `expose_sensors`
 
 Enable/disable automatic HA entity exposure through generated `extend` OIDs.
 
-### Option: `expose_sensors_OID_base`
-
-Reserved for compatibility with previous versions.
-
 ### Option: `sensors_to_expose`
 
 Filter entity IDs for auto-generated `extend` OIDs. Supports comma-separated wildcards.
 
-### Option: `enable_ups_oid_mapping`
+## EcoFlow auto-generated UPS OIDs
 
-Enables manual mapping of HA entities to UPS-MIB OIDs under `.1.3.6.1.2.1.33`.
+When enabled, the add-on generates practical UPS-MIB mappings under `.1.3.6.1.2.1.33`:
 
-### Option: `ups_oid_mappings`
+- `1.3.6.1.2.1.33.1.1.2.0` => static model string
+- `1.3.6.1.2.1.33.1.1.5.0` => static device name string
+- `1.3.6.1.2.1.33.1.2.4.0` => battery level percent
+- `1.3.6.1.2.1.33.1.4.1.0` => output source (normal vs battery from plug state)
+- `1.3.6.1.2.1.33.1.4.4.1.4.1` => output power
 
-JSON array with one object per mapped OID:
+Plug state behavior is mapped as requested:
 
-- `oid` (required)
-- `entity_id` (required)
-- `snmp_type` (optional; default `string`)
-- `value_map` (optional object for enum translation)
-- `scale` and `offset` (optional numeric transforms)
-- `default_value` (optional fallback for unknown/unavailable)
-
-
-### How to input `ups_oid_mappings` in Home Assistant
-
-`ups_oid_mappings` is defined as a **string** in `config.json`, so you must provide a JSON array as string content.
-
-Use one of these formats in the add-on configuration editor:
-
-```yaml
-enable_ups_oid_mapping: true
-ups_oid_mappings: >-
-  [
-    {"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"},
-    {"oid":"1.3.6.1.2.1.33.1.2.1.0","entity_id":"binary_sensor.ef_d32156_plug","snmp_type":"string","value_map":{"on":"OL","off":"OB"}}
-  ]
-```
-
-or as a single line:
-
-```yaml
-enable_ups_oid_mapping: true
-ups_oid_mappings: '[{"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"}]'
-```
-
-After saving and restarting the add-on, query mapped OIDs with your SNMP client, for example:
-
-```bash
-snmpget -v2c -c public <ha-ip> 1.3.6.1.2.1.33.1.2.4.0
-```
-
+- plug `on` => normal line (`OL` behavior)
+- plug `off` => on battery (`OB` behavior)
 
 ## Support
 
