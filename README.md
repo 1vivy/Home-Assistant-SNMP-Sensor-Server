@@ -66,6 +66,17 @@ You can now map specific Home Assistant entities to standard UPS-MIB OIDs under 
    - `scale` and `offset` (optional): numeric conversion before returning.
    - `default_value` (optional): fallback for unavailable/unknown values.
 
+`ups_oid_mappings` is a string field, so in the add-on config use YAML `>-` (recommended) and paste a JSON array as its value.
+
+```yaml
+enable_ups_oid_mapping: true
+ups_oid_mappings: >-
+  [
+    {"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"},
+    {"oid":"1.3.6.1.2.1.33.1.2.1.0","entity_id":"binary_sensor.ef_d32156_plug","snmp_type":"string","value_map":{"on":"OL","off":"OB"}}
+  ]
+```
+
 Example:
 
 ```json

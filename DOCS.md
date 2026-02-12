@@ -77,6 +77,36 @@ JSON array with one object per mapped OID:
 - `scale` and `offset` (optional numeric transforms)
 - `default_value` (optional fallback for unknown/unavailable)
 
+
+### How to input `ups_oid_mappings` in Home Assistant
+
+`ups_oid_mappings` is defined as a **string** in `config.json`, so you must provide a JSON array as string content.
+
+Use one of these formats in the add-on configuration editor:
+
+```yaml
+enable_ups_oid_mapping: true
+ups_oid_mappings: >-
+  [
+    {"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"},
+    {"oid":"1.3.6.1.2.1.33.1.2.1.0","entity_id":"binary_sensor.ef_d32156_plug","snmp_type":"string","value_map":{"on":"OL","off":"OB"}}
+  ]
+```
+
+or as a single line:
+
+```yaml
+enable_ups_oid_mapping: true
+ups_oid_mappings: '[{"oid":"1.3.6.1.2.1.33.1.2.4.0","entity_id":"sensor.ef_d32156_battery_level","snmp_type":"integer"}]'
+```
+
+After saving and restarting the add-on, query mapped OIDs with your SNMP client, for example:
+
+```bash
+snmpget -v2c -c public <ha-ip> 1.3.6.1.2.1.33.1.2.4.0
+```
+
+
 ## Support
 
 In case you've found a bug, please [open an issue on my GitHub][issue].
