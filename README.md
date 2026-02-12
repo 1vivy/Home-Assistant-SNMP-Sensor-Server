@@ -37,7 +37,7 @@
 
 3. Go to the `three dots` on the top right screen and open `Repositories`
 
-4. Copy and paste this link in Add box, and press "Add" button: 
+4. Copy and paste this link in Add box, and press "Add" button:
 `https://github.com/PecceG2/Home-Assistant-SNMP-Sensor-Server`
 
 5. Close Add-on pop-up, refresh the page with F5 and go to `Configuration` -> `Add-ons, Backup & supervisor`.
@@ -47,8 +47,45 @@
 
 **Configuration and usage**
 ---
-Coming soon usage docs
 
+### Auto-generated sensor OIDs
+
+The add-on can still auto-generate OIDs for all Home Assistant entities by using `extend` entries (same behavior as previous versions).
+
+### Manual UPS OID mapping (EcoFlow / UPS-MIB use case)
+
+You can now map specific Home Assistant entities to standard UPS-MIB OIDs under `.1.3.6.1.2.1.33`.
+
+1. Enable `enable_ups_oid_mapping`.
+2. Fill `ups_oid_mappings` with a JSON array.
+3. Each entry supports:
+   - `oid` (required): full UPS OID.
+   - `entity_id` (required): HA entity to read.
+   - `snmp_type` (optional): `string`, `integer`, `gauge`, `counter`, `timeticks`.
+   - `value_map` (optional): map raw states to desired output.
+   - `scale` and `offset` (optional): numeric conversion before returning.
+   - `default_value` (optional): fallback for unavailable/unknown values.
+
+Example:
+
+```json
+[
+  {
+    "oid": "1.3.6.1.2.1.33.1.2.4.0",
+    "entity_id": "sensor.ef_d32156_battery_level",
+    "snmp_type": "integer"
+  },
+  {
+    "oid": "1.3.6.1.2.1.33.1.2.1.0",
+    "entity_id": "binary_sensor.ef_d32156_plug",
+    "snmp_type": "string",
+    "value_map": {
+      "on": "OL",
+      "off": "OB"
+    }
+  }
+]
+```
 
 <br />
 
