@@ -16,7 +16,6 @@ UPS_MAPPING_FILE="/tmp/ups-oid-mappings.json"
 if bashio::var.true "$(bashio::config 'expose_sensors')" || \
 	bashio::var.true "$(bashio::config 'enable_ups_oid_mapping')" || \
 	bashio::var.true "$(bashio::config 'ecoflow_ups_mode')"; then
-	apk add py3-requests
 fi
 
 if bashio::var.true "$(bashio::config 'expose_sensors')"; then
