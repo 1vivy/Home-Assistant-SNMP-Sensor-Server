@@ -1,5 +1,6 @@
 {
-	"name": "PecceG2 SNMP Server Add-on",
-	"url": "https://github.com/PecceG2/HASS-SNMP-Sensors-and-Entities-addon",
-	"maintainer": "PecceG2 <me@pecceg2.com"
+	"name": "Ecoflow BLE SNMP Server Add-on",
+	"url": "https://github.com/1vivy/ha-ef-snmp-addon",
+	"maintainer": "1vivy <1vivy@tutanota.com>"
+
 }
